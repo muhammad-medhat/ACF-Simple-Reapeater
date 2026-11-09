@@ -3,6 +3,7 @@
 A standalone WordPress plugin adding a **C21 Repeater (Free)** custom ACF field type. It **does not require ACF PRO**. ACF Free must be installed and active.
 
 ## Install
+
 1. Upload `c21-acf-free-repeater.zip` through WordPress Plugins → Add New → Upload Plugin.
 2. Activate it alongside ACF Free.
 3. Go to ACF → Field Groups → edit/create a field group for `rm_menu_item`.
@@ -55,6 +56,7 @@ foreach ((array) $rows as $index => $row) {
 ```
 
 ## How this differs from ACF PRO Repeater
+
 - The field is registered through ACF Free's public custom-field-type API.
 - The rows are saved **as a single serialized array in wp_postmeta**, not as ACF PRO Repeater's individually indexed subfield metadata. ACF `get_field`/`update_field` works, but PRO's `have_rows()`, `the_row()`, `get_sub_field()`, and `add_row()` helpers are **not implemented**.
 - Subfields are configured with one-line definitions (name|label|type), not ACF PRO's nested graphical field editor.
@@ -63,7 +65,8 @@ foreach ((array) $rows as $index => $row) {
 - The plugin focuses on field UI and values; it does not replace your existing importer/exporter. Adapt those modules to use the array returned from `get_field()`.
 
 ## Notes
+
 - Back up the WordPress database before deploying.
 - Test in staging first. Not validated with your live C21 installation.
 - Subfield names should not be renamed after data is created without a migration.
-- For truly huge variation counts, use a separate database structure or dedicated CPT rather than a very large admin form.
+- # For truly huge variation counts, use a separate database structure or dedicated CPT rather than a very large admin form.
