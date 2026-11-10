@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MD Repeater for ACF Free
  * Description: A lightweight repeater field type for Advanced Custom Fields (free), with unlimited rows and configurable text, textarea, number and select subfields.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Muhammad Medhat
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 //constants
-define('MD_ACF_SIMPLE_REPEATER_VERSION', '1.0.0');
+define('MD_ACF_SIMPLE_REPEATER_VERSION', '1.0.1');
 define('MD_ACF_SIMPLE_REPEATER_PATH', plugin_dir_path(__FILE__));
 define('MD_ACF_SIMPLE_REPEATER_URL', plugin_dir_url(__FILE__));
 
@@ -28,7 +28,7 @@ function md_register_acf_simple_repeater() {
     class MD_ACF_Simple_Repeater_Field extends acf_field {
         public function __construct() {
             $this->name = 'md_repeater';
-            $this->label = __('MD Repeater (Free)', 'simple-acf-repeater');
+            $this->label = __('MD Repeater (Simple)', 'simple-acf-repeater');
             $this->category = 'layout';
             $this->defaults = array(
                 'subfields_definition' => "desc_ar|Arabic Description|text\ndesc_en|English Description|text\nprice|Price|number",
@@ -116,7 +116,8 @@ function md_register_acf_simple_repeater() {
 
         private function render_row($definitions, $row, $field_name, $index, $template = false) {
             echo '<tr class="md-repeater-row">';
-            echo '<td class="md-repeater-handle"><button type="button" class="button-link md-repeater-drag" aria-label="Move row" title="Drag to reorder">&#9776;</button><span class="md-repeater-number">' . ($template ? '#' : esc_html((string) ($index + 1))) . '</span></td>';
+            echo '<td class="md-repeater-handle"><span class="md-repeater-drag" role="button" tabindex="0" aria-label="Drag to reorder row" title="Drag to reorder">&#9776;</span><button type="button" class="button-link md-repeater-up" aria-label="Move row up" title="Move up">&#8593;</button><button type="button" class="button-link md-repeater-down" aria-label="Move row down" title="Move down">&#8595;</button><span class="md-repeater-number">' . ($template ? '#' : esc_html((string) ($index + 1))) . '</span></td>';
+            
             foreach ($definitions as $def) {
                 echo '<td>';
                 $input_name = $field_name . '[' . $index . '][' . $def['name'] . ']';
@@ -231,9 +232,15 @@ function md_register_acf_simple_repeater() {
         }
 
         public function input_admin_enqueue_scripts() {
-            wp_enqueue_style('simple-acf-repeater', MD_ACF_SIMPLE_REPEATER_URL. 'assets/repeater.css', array(), '1.0.0');
+            wp_enqueue_style('simple-acf-repeater',
+                MD_ACF_SIMPLE_REPEATER_URL. 'assets/repeater.css',
+                array(),
+                MD_ACF_SIMPLE_REPEATER_VERSION);
             wp_enqueue_script('jquery-ui-sortable');
-            wp_enqueue_script('simple-acf-repeater', MD_ACF_SIMPLE_REPEATER_URL. 'assets/repeater.js', array('jquery', 'jquery-ui-sortable'), '1.0.0', true);
+            wp_enqueue_script('simple-acf-repeater',
+                MD_ACF_SIMPLE_REPEATER_URL. 'assets/repeater.js', 
+                array('jquery', 'jquery-ui-sortable'),
+                MD_ACF_SIMPLE_REPEATER_VERSION, true);
         }
     }
 

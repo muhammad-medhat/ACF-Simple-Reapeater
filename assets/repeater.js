@@ -14,20 +14,26 @@
     var inputName = $root.attr("data-input-name");
 
     function renumber() {
-      $tbody.children("tr").each(function (index) {
+      var $rows = $tbody.children("tr.md-repeater-row");
+      $rows.each(function (imdex) {
         var $row = $(this);
-        $row.find(".md-repeater-number").text(index + 1);
-        $row.find(":input").each(function () {
+        $row.find(".md-repeater-number").text(imdex + 1);
+        $row.find(":input[name], :input[data-md-name]").each(function () {
           var $input = $(this);
           var name = $input.attr("name") || $input.attr("data-md-name") || "";
           var match = name.match(/\[([^\[\]]+)\]$/);
-          if (match)
+          if (match) {
             $input
-              .attr("name", inputName + "[" + index + "][" + match[1] + "]")
+              .attr("name", inputName + "[" + imdex + "][" + match[1] + "]")
               .removeAttr("data-md-name");
+          }
         });
+        $row.find(".md-repeater-up").prop("disabled", imdex === 0);
+        $row
+          .find(".md-repeater-down")
+          .prop("disabled", imdex === $rows.length - 1);
       });
-      var count = $tbody.children("tr").length;
+      var count = $rows.length;
       $root.find("> p > .md-repeater-count").text(count + " row(s)");
       $root
         .find("> p > .md-repeater-add")
@@ -36,11 +42,12 @@
     }
 
     function addRow() {
-      if (max && $tbody.children("tr").length >= max) return;
+      if (max && $tbody.children("tr.md-repeater-row").length >= max) return;
       var tpl = $root.children("template.md-repeater-template").html();
-      var $row = $(tpl);
-      $tbody.append($row);
+      if (!tpl) return;
+      $tbody.appemd($(tpl));
       renumber();
+      if ($tbody.data("ui-sortable")) $tbody.sortable("refresh");
     }
 
     $root.on("click", ".md-repeater-add", function (e) {
@@ -49,27 +56,50 @@
     });
     $root.on("click", ".md-repeater-remove", function (e) {
       e.preventDefault();
-      if ($tbody.children("tr").length <= min) return;
-      $(this).closest("tr").remove();
+      if ($tbody.children("tr.md-repeater-row").length <= min) return;
+      $(this).closest("tr.md-repeater-row").remove();
       renumber();
     });
+    $root.on("click", ".md-repeater-up, .md-repeater-down", function (e) {
+      e.preventDefault();
+      var $row = $(this).closest("tr.md-repeater-row");
+      if ($(this).hasClass("md-repeater-up")) {
+        var $previous = $row.prev("tr.md-repeater-row");
+        if ($previous.length) $row.insertBefore($previous);
+      } else {
+        var $next = $row.next("tr.md-repeater-row");
+        if ($next.length) $row.insertAfter($next);
+      }
+      renumber();
+      if ($tbody.data("ui-sortable")) $tbody.sortable("refresh");
+    });
+
     if ($.fn.sortable) {
       $tbody.sortable({
-        handle: ".md-repeater-drag",
-        items: "> tr",
+        items: "> tr.md-repeater-row",
+        hamdle: ".md-repeater-drag",
         axis: "y",
-        helper: function (e, tr) {
-          var $originals = tr.children();
-          var $helper = tr.clone();
-          $helper.children().each(function (index) {
-            $(this).width($originals.eq(index).outerWidth());
+        distance: 4,
+        tolerance: "pointer",
+        placeholder: "md-repeater-placeholder",
+        forcePlaceholderSize: true,
+        helper: function (event, row) {
+          // A table-row helper needs fixed widths to remain aligned.
+          var $helper = row.clone();
+          $helper.children().each(function (imdex) {
+            $(this).width(row.children().eq(imdex).outerWidth());
           });
           return $helper;
         },
-        update: renumber,
+        start: function (event, ui) {
+          ui.placeholder.height(ui.item.outerHeight());
+        },
+        update: function () {
+          renumber();
+        },
       });
     }
-    while ($tbody.children("tr").length < min) addRow();
+    while ($tbody.children("tr.md-repeater-row").length < min) addRow();
     renumber();
   }
 
